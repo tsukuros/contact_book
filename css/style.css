@@ -91,6 +91,7 @@ h1 {
 .ok {
 	height: 14px;
 	width: 14px;
+	float: right;
 }
 .x-sign {
 	display: none;
@@ -103,8 +104,26 @@ h1 {
 	-webkit-transition: all .2s ease-in-out;
 }
 .x-sign:hover {
-	-webkit-transform: scale(2);
+	color: red;
+	-webkit-transform: scale(1.7);
 }
 .name_item:hover .x-sign {
+	display: inline;
+}
+.edit {
+	display: none;
+	position: absolute;
+	z-index: 9;
+	top: 3px;
+	right: 30px;
+	height: 14px;
+	width: 14px;
+	-webkit-transition: all .2s ease-in-out;
+}
+.edit:hover {
+	color: orange;
+	-webkit-transform: scale(1.5);
+}
+.name_item:hover .edit {
 	display: inline;
 }

@@ -58,7 +58,7 @@ jQuery(function($){
 		var i = 0;
 		var list_of_names = '<div id="names-list">';
 		while(i < list.length){
-			list_of_names += '<div id="'+ convertToSlug(list[i].full_name) +'" class="name_item" data-email="' + list[i].email + '" data-phone="' + list[i].phone + '" data-group="' + list[i].group + '">' + list[i].full_name + '<span class="glyphicon glyphicon-remove x-sign"></span></div>' 
+			list_of_names += '<div id="'+ convertToSlug(list[i].full_name) +'" class="name_item" data-email="' + list[i].email + '" data-phone="' + list[i].phone + '" data-group="' + list[i].group + '">' + list[i].full_name + '<span data-toggle="tooltip" data-placement="top" title="Edit Contact" class="glyphicon glyphicon-pencil edit"></span><span data-toggle="tooltip" data-placement="top" title="Remove Contact" class="glyphicon glyphicon-remove x-sign"></span></div>' 
 			i++;
 		}
 		list_of_names += '</div>';
@@ -67,7 +67,7 @@ jQuery(function($){
 
 	function getGroups(list){
 		var g = 0;
-		var list_of_groups = '<ul id="group-list" class="dropdown-menu"><li class="group-item">All Contacts</li>';
+		var list_of_groups = '<ul id="group-list" class="dropdown-menu"><li class="group-item">All Contacts<span class="glyphicon glyphicon-ok-circle ok"></span></li>';
 		while(g < list.length){
 			list_of_groups += '<li class="divider"></li><li class="group-item">'+list[g]+'</li>'
 			g++;
@@ -171,15 +171,16 @@ jQuery(function($){
     }
 	});
 	// edit selected contact
-	edit_btn.on('click', function(){
-		index = getIndexByName($('.selected').text());
-		$form.find('#full-name').val(CBOOK[index].full_name);
-		$form.find('#email').val(CBOOK[index].email);
-		$form.find('#phone').val(CBOOK[index].phone);
-		$form.find('#group').val(CBOOK[index].group);
+	$(document).on('click', '.edit', function(e){
+		e.stopPropagation();
+		var el = $(this).parent();
+		el.addClass('selected').siblings().removeClass('selected');
+		$form.find('#full-name').val(el.text());
+		$form.find('#email').val(el.data('email'));
+		$form.find('#phone').val(el.data('phone'));
+		$form.find('#group').val(el.data('group'));
 		$('#c-detail').addClass('hidden');
-		edit_btn.addClass('hidden');
-		$form.find('#create-contact').replaceWith('<button id="save-contact" type="button" class="btn btn-info">Save</button>');
+		$form.find('#create-contact').replaceWith('<button id="save-contact" type="button" class="btn btn-info">Done</button>');
 		$form.removeClass('hidden');
 	});
 	// save edited contact
