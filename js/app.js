@@ -65,7 +65,7 @@ jQuery(function($){
 		var i = 0;
 		var list_of_names = '<div id="names-list">';
 		while(i < list.length){
-			list_of_names += '<div id="'+ convertToSlug(list[i].full_name) +'" class="name_item" data-email="' + list[i].email + '" data-phone="' + list[i].phone + '" data-group="' + list[i].group + '">' + list[i].full_name + '<span data-toggle="tooltip" data-placement="top" title="Transfer Contact" class="glyphicon glyphicon-transfer transfer"></span><span data-toggle="tooltip" data-placement="top" title="Edit Contact" class="glyphicon glyphicon-edit edit"></span><span data-toggle="tooltip" data-placement="top" title="Remove Contact" class="glyphicon glyphicon-remove x-sign"></span></div>' 
+			list_of_names += '<div id="'+ convertToSlug(list[i].full_name) +'" class="name_item" data-email="' + list[i].email + '" data-phone="' + list[i].phone + '" data-group="' + list[i].group + '">' + list[i].full_name + '<span data-toggle="tooltip" data-placement="top" title="Transfer Contact To:" class="glyphicon glyphicon-transfer transfer"></span><span data-toggle="tooltip" data-placement="top" title="Edit Contact" class="glyphicon glyphicon-edit edit"></span><span data-toggle="tooltip" data-placement="top" title="Remove Contact" class="glyphicon glyphicon-remove x-sign"></span></div>' 
 			i++;
 		}
 		list_of_names += '</div>';
@@ -81,6 +81,18 @@ jQuery(function($){
 		}
 		list_of_groups += '</ul>';
 		$('#group-list').replaceWith(list_of_groups);
+	}
+
+	function getTransferGroups(list){
+		var t = 0;
+		var list_of_groups = '<ul id="transfer-group-list"><li class="untransferable">All Contacts</li>';
+		while(t < list.length){
+			list_of_groups += '<li class="li-divider"></li><li class="transfer-group-item">'+list[t]+'</li>'
+			t++;
+		}
+		list_of_groups += '</ul>';
+		// $('#transfer-group-list').replaceWith(list_of_groups);
+		return list_of_groups;
 	}
 
 	function getIndexByName(name){
@@ -118,15 +130,46 @@ jQuery(function($){
 	    });
 	};
 
+	function closeOpenPopover(){
+		if($('.popover').length > 0){
+			$('.selected').find('.transfer').click();
+		}
+	}
+
+	function createGroup(group_name, contact_list){
+		var c_names = [];
+		var s = '';
+		if(group_name){
+			CGROUPS.push(group_name);
+			getGroups(CGROUPS);
+			$('#new-group').popover('toggle');
+			contact_list.each(function(){
+				var index = getIndexByName($(this).text());
+				c_names.push($(this).text());
+				CBOOK[index].group = group_name;
+			});
+			getNames(CBOOK);
+			if(contact_list.length == 1){
+				s = '';
+				$('#c-detail').replaceWith('<div id="c-detail">Group <strong>'+ group_name +'</strong> has been successfully created with '+ contact_list.length +' contact'+s+'('+ c_names.join(', ') +').</div>').removeClass('hidden');
+			}else{
+				s = 's';
+				$('#c-detail').replaceWith('<div id="c-detail">Group <strong>'+ group_name +'</strong> has been successfully created with '+ contact_list.length +' contact'+s+'('+ c_names.join(', ') +').</div>').removeClass('hidden');
+			}
+			
+		}
+	}
+	
 	getNames(CBOOK);
 	getGroups(CGROUPS);
 	// show selected contact
 	$(document).on('click', '.name_item', function(e){
 		if(e.ctrlKey || e.metaKey){
+			closeOpenPopover();
 			$(this).toggleClass('selected');
 		}else{
+			closeOpenPopover();
 			$form.addClass('hidden');
-			edit_btn.removeClass('hidden');
 			name = $(this).text();
 			email = $(this).data('email');
 			phone = $(this).data('phone');
@@ -138,7 +181,6 @@ jQuery(function($){
 	// bring up the form for new contact
 	$(document).on('click', '#new-contact', function(){
 		$('#c-detail').addClass('hidden');
-		edit_btn.addClass('hidden');
 		$form.removeClass('hidden');
 		$('.selected').removeClass('selected');
 	});
@@ -264,30 +306,6 @@ jQuery(function($){
 	    }
 	});
 
-	function createGroup(group_name, contact_list){
-		var c_names = [];
-		var s = '';
-		if(group_name){
-			CGROUPS.push(group_name);
-			getGroups(CGROUPS);
-			$('#new-group').popover('toggle');
-			contact_list.each(function(){
-				var index = getIndexByName($(this).text());
-				c_names.push($(this).text());
-				CBOOK[index].group = group_name;
-			});
-			getNames(CBOOK);
-			if(contact_list.length == 1){
-				s = '';
-				$('#c-detail').replaceWith('<div id="c-detail">Group <strong>'+ group_name +'</strong> has been successfully created with '+ contact_list.length +' contact'+s+'('+ c_names.join(', ') +').</div>').removeClass('hidden');
-			}else{
-				s = 's';
-				$('#c-detail').replaceWith('<div id="c-detail">Group <strong>'+ group_name +'</strong> has been successfully created with '+ contact_list.length +' contact'+s+'('+ c_names.join(', ') +').</div>').removeClass('hidden');
-			}
-			
-		}
-	}
-
 	$(document).on('click', '#done_button', function(){
 		selected = $('.selected');
 		createGroup($('#group-name').val(), selected);
@@ -315,25 +333,54 @@ jQuery(function($){
 			alert('No Contact Selected');
 		}
 	});
-
-	// $('#new-group').on('show.bs.popover', function () {
-	// 	if($('.selected').length ){}
-	// });
 // end create new group
 
 // add contact to specific group
+	$('.transfer').popover({ 
+	    html : true,
+	    title: function(){
+	    	return 'Transfer Contact To:';
+	  	},
+	    content: $(getTransferGroups(CGROUPS)),
+	    placement: 'right',
+	    container: 'body'
+	});
+
 	$(document).on('click', '.transfer', function(e){
 		e.stopPropagation();
 		var el = $(this).parent();
-		$('.transfer').popover('toggle');
+		el.addClass('selected').siblings().removeClass('selected');
+		el.popover('show');
 	});
 
-	$('.transfer').popover({ 
-	    html : true,
-	    title: 'Transfer to: ',
-	    content: function() {
-	      return $("#group-list").html();
-	    }
+	$('.transfer').on('show.bs.popover', function(){
+		if($('.popover').length > 0){
+			$('.selected').find('.transfer').click();
+			console.log('closed popover');
+		}
+	});
+
+	$('.transfer').on('shown.bs.popover', function(){
+		var index = getIndexByName($(this).parent().text());
+		var el_group_name = CBOOK[index].group;
+		$('.transfer-group-item').each(function(){
+			if($(this).text() == el_group_name){
+				$(this).addClass('untransferable').siblings().removeClass('untransferable');
+			}
+		});
+	})
+
+	$(document).on('click', '.transfer-group-item', function(){
+		if($(this).hasClass('untransferable')){
+			return false;
+		}else{
+			var el = $('.selected');
+			var index = getIndexByName(el.text());
+			CBOOK[index].group = $(this).text();
+			el.data('group', $(this).text());
+			el.find('.transfer').click();
+			getGroups(CGROUPS);
+		}
 	});
 // end add contact to specific group
 

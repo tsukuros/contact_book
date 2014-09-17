@@ -51,6 +51,10 @@ h1 {
 	border-radius: 0 10px 10px 0;
 	padding: 20px;
 }
+#names-list {
+	height: 180px;
+	overflow-y: scroll;
+}
 .name_item:hover {
 	cursor: pointer;
 	background: #d6d6dd;
@@ -152,9 +156,29 @@ h1 {
 	max-width: 400px !important;
 	width: 280px;
 }
-.popover-title {
-	/*display: inline-block;*/
-}
 .input-wrap {
 	display: inline-block;
+}
+#transfer-group-list {
+	list-style-type: none;
+	padding-left: 0;
+}
+#transfer-group-list .li-divider {
+	height: 1px;
+	border-top: 1px solid #d6d6dd;
+	width: 100%;
+}
+.transfer-group-item {
+	padding: 2px 5px;
+}
+.transfer-group-item:hover {
+	cursor: pointer;
+	background-color: #d6d6d6;
+}
+.untransferable {
+	opacity: .2;	
+}
+.untransferable:hover {
+	opacity: .2;
+	cursor: not-allowed;
 }
