@@ -18,6 +18,12 @@ var CBOOK = CBOOK || [
 	group: 'work'
 },
 {
+	full_name: 'Roger Graves',
+	email: 'rogergraves@gmail.com',
+	phone: '0463733134',
+	group: 'work'
+},
+{
 	full_name: 'Dmytriy Melnichenko',
 	email: 'dmytriymelnichenko@gmail.com',
 	phone: '0939872497',
@@ -37,7 +43,7 @@ var CBOOK = CBOOK || [
 },
 ]
 
-var CGROUPS = CGROUPS || ['family', 'work', 'school', 'english']
+var CGROUPS = CGROUPS || ['family', 'work', 'school', 'english'];
 
 jQuery(function($){
 	var name,
@@ -48,6 +54,7 @@ jQuery(function($){
 			new_email,
 			new_phone,
 			new_group,
+			selected,
 			edit_btn = $('#edit'),
 			index,
 			$container = $('#content'),
@@ -58,7 +65,7 @@ jQuery(function($){
 		var i = 0;
 		var list_of_names = '<div id="names-list">';
 		while(i < list.length){
-			list_of_names += '<div id="'+ convertToSlug(list[i].full_name) +'" class="name_item" data-email="' + list[i].email + '" data-phone="' + list[i].phone + '" data-group="' + list[i].group + '">' + list[i].full_name + '<span data-toggle="tooltip" data-placement="top" title="Edit Contact" class="glyphicon glyphicon-pencil edit"></span><span data-toggle="tooltip" data-placement="top" title="Remove Contact" class="glyphicon glyphicon-remove x-sign"></span></div>' 
+			list_of_names += '<div id="'+ convertToSlug(list[i].full_name) +'" class="name_item" data-email="' + list[i].email + '" data-phone="' + list[i].phone + '" data-group="' + list[i].group + '">' + list[i].full_name + '<span data-toggle="tooltip" data-placement="top" title="Transfer Contact" class="glyphicon glyphicon-transfer transfer"></span><span data-toggle="tooltip" data-placement="top" title="Edit Contact" class="glyphicon glyphicon-edit edit"></span><span data-toggle="tooltip" data-placement="top" title="Remove Contact" class="glyphicon glyphicon-remove x-sign"></span></div>' 
 			i++;
 		}
 		list_of_names += '</div>';
@@ -114,15 +121,19 @@ jQuery(function($){
 	getNames(CBOOK);
 	getGroups(CGROUPS);
 	// show selected contact
-	$(document).on('click', '.name_item', function(){
-		$form.addClass('hidden');
-		edit_btn.removeClass('hidden');
-		name = $(this).text();
-		email = $(this).data('email');
-		phone = $(this).data('phone');
-		group = $(this).data('group');
-		$container.find('#c-detail').replaceWith('<div id="c-detail"><p><span class="glyphicon glyphicon-user"></span> Full Name: ' + name + '</p><p><span class="glyphicon glyphicon-envelope"></span> Email: ' + email + '</p><p><span class="glyphicon glyphicon-phone"></span> Phone: ' + phone + '</p><p> Group: ' + group+ '</p></div>');
-		$(this).addClass('selected').siblings().removeClass('selected');
+	$(document).on('click', '.name_item', function(e){
+		if(e.ctrlKey || e.metaKey){
+			$(this).toggleClass('selected');
+		}else{
+			$form.addClass('hidden');
+			edit_btn.removeClass('hidden');
+			name = $(this).text();
+			email = $(this).data('email');
+			phone = $(this).data('phone');
+			group = $(this).data('group');
+			$container.find('#c-detail').replaceWith('<div id="c-detail"><p><span class="glyphicon glyphicon-user"></span> Full Name: ' + name + '</p><p><span class="glyphicon glyphicon-envelope"></span> Email: ' + email + '</p><p><span class="glyphicon glyphicon-phone"></span> Phone: ' + phone + '</p><p> Group: ' + group+ '</p></div>');
+			$(this).addClass('selected').siblings().removeClass('selected');
+		}
 	});
 	// bring up the form for new contact
 	$(document).on('click', '#new-contact', function(){
@@ -214,7 +225,7 @@ jQuery(function($){
       }
     });
 	});
-
+	// remove search term
 	$(document).on('click', '#remove_search_icon', function(){
 		$('#search_by_name').val('');
 		$('.name_item').fadeIn();
@@ -241,5 +252,89 @@ jQuery(function($){
 		}
 	});
 // end filter by group
+
+// create new group
+	$('#new-group').popover({ 
+	    html : true,
+	    title: function() {
+	      return $("#popover-head").html();
+	    },
+	    content: function() {
+	      return $("#popover-content").html();
+	    }
+	});
+
+	function createGroup(group_name, contact_list){
+		var c_names = [];
+		var s = '';
+		if(group_name){
+			CGROUPS.push(group_name);
+			getGroups(CGROUPS);
+			$('#new-group').popover('toggle');
+			contact_list.each(function(){
+				var index = getIndexByName($(this).text());
+				c_names.push($(this).text());
+				CBOOK[index].group = group_name;
+			});
+			getNames(CBOOK);
+			if(contact_list.length == 1){
+				s = '';
+				$('#c-detail').replaceWith('<div id="c-detail">Group <strong>'+ group_name +'</strong> has been successfully created with '+ contact_list.length +' contact'+s+'('+ c_names.join(', ') +').</div>').removeClass('hidden');
+			}else{
+				s = 's';
+				$('#c-detail').replaceWith('<div id="c-detail">Group <strong>'+ group_name +'</strong> has been successfully created with '+ contact_list.length +' contact'+s+'('+ c_names.join(', ') +').</div>').removeClass('hidden');
+			}
+			
+		}
+	}
+
+	$(document).on('click', '#done_button', function(){
+		selected = $('.selected');
+		createGroup($('#group-name').val(), selected);
+	});
+	// create new group by hitting enter
+	$(document).on('keyup', '#group-name', function(e){
+		selected = $('.selected');
+		if(e.which == 13){
+			createGroup($('#group-name').val(), selected);
+		}
+	});
+
+	$('#new-group').on('shown.bs.popover', function () {
+		$('#group-name').focus();
+		selected = $('.selected');
+		var s = '';
+		if(selected.length > 1){
+			s = 's';
+			$('.popover-title').html('New Group: <span class="badge">'+ selected.length +'</span> contact'+s+' selected');
+		}else if(selected.length == 1){
+			s = ''
+			$('.popover-title').html('New Group: <span class="badge">'+ selected.length +'</span> contact'+s+' selected');
+		}else{
+			$('#new-group').popover('hide');
+			alert('No Contact Selected');
+		}
+	});
+
+	// $('#new-group').on('show.bs.popover', function () {
+	// 	if($('.selected').length ){}
+	// });
+// end create new group
+
+// add contact to specific group
+	$(document).on('click', '.transfer', function(e){
+		e.stopPropagation();
+		var el = $(this).parent();
+		$('.transfer').popover('toggle');
+	});
+
+	$('.transfer').popover({ 
+	    html : true,
+	    title: 'Transfer to: ',
+	    content: function() {
+	      return $("#group-list").html();
+	    }
+	});
+// end add contact to specific group
 
 });
