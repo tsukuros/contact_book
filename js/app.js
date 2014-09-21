@@ -2,43 +2,43 @@ var CBOOK = CBOOK || [
 {
 	full_name: 'Vlada Boiko',
 	email: 'vladaboiko@gmail.com',
-	phone: '0937402119',
+	phone: '+380937402119',
 	group: 'family'
 },
 {
 	full_name: 'Sergey Vlasenko',
 	email: 'sergeyvlasenko@gmail.com',
-	phone: '0934956010',
+	phone: '+380934956010',
 	group: 'family'
 },
 {
 	full_name: 'Alex Marusik',
 	email: 'alexmarusik@gmail.com',
-	phone: '0957733119',
+	phone: '+380957733119',
 	group: 'work'
 },
 {
 	full_name: 'Roger Graves',
 	email: 'rogergraves@gmail.com',
-	phone: '0463733134',
+	phone: '+380463733134',
 	group: 'work'
 },
 {
 	full_name: 'Dmytriy Melnichenko',
 	email: 'dmytriymelnichenko@gmail.com',
-	phone: '0939872497',
+	phone: '+380939872497',
 	group: 'school'
 },
 {
 	full_name: 'Jimmy Hill',
 	email: 'jimmyhill@gmail.com',
-	phone: '0631245447',
+	phone: '+380631245447',
 	group: 'english'
 },
 {
 	full_name: 'Many Trueman',
 	email: 'manytrueman@gmail.com',
-	phone: '0671471234',
+	phone: '+380671471234',
 	group: 'english'
 },
 ]
@@ -138,7 +138,6 @@ jQuery(function($){
 
 	function createGroup(group_name, contact_list){
 		var c_names = [];
-		var s = '';
 		if(group_name){
 			CGROUPS.push(group_name);
 			getGroups(CGROUPS);
@@ -149,16 +148,62 @@ jQuery(function($){
 				CBOOK[index].group = group_name;
 			});
 			getNames(CBOOK);
-			if(contact_list.length == 1){
-				s = '';
-				$('#c-detail').replaceWith('<div id="c-detail">Group <strong>'+ group_name +'</strong> has been successfully created with '+ contact_list.length +' contact'+s+'('+ c_names.join(', ') +').</div>').removeClass('hidden');
-			}else{
-				s = 's';
-				$('#c-detail').replaceWith('<div id="c-detail">Group <strong>'+ group_name +'</strong> has been successfully created with '+ contact_list.length +' contact'+s+'('+ c_names.join(', ') +').</div>').removeClass('hidden');
-			}
-			
+			$('#c-detail').replaceWith('<div id="c-detail">Group <strong>'+ group_name +'</strong> has been successfully created with '+ contact_list.length +' contact'+(contact_list.length == 1 ? '' : 's')+'('+ c_names.join(', ') +').</div>').removeClass('hidden');
 		}
 	}
+
+	function validateEmail(field) {
+
+      var email_str = field.val();
+      var result_str = email_str.match('^[-0-9a-zA-Z.+_]+@[-0-9a-zA-Z.+_]+\.[a-zA-Z]{2,4}$');
+
+      if (result_str == null) {
+          if ($('.user_email_error').length > 0) {
+              return false;
+          } else {
+              field.parent().addClass('has-error')
+                  .append('<span class="user_email_error">Please provide valid email.</span>');
+          }
+      } else {
+          field.parent().removeClass('has-error');
+          $('.user_email_error').remove();
+          return field.val();
+      }
+  }
+
+  function  validateUsername(field) {
+        
+        if (field.val().length < 1) {
+            if ($('.user_name_error').length > 0) {
+                return false;
+            } else {
+                field.parent().addClass('has-error').append('<span class="user_name_error">Name can\'t be blank.</span>');
+            }
+        } else {
+            field.parent().removeClass('has-error');
+            $('.user_name_error').remove();
+            return field.val()
+        }
+    }
+
+  function validatePhone(field) {
+
+      var phone_str = field.val();
+      var result_str = phone_str.match('1?\W*([2-9][0-8][0-9])\W*([2-9][0-9]{2})\W*([0-9]{4})(\se?x?t?(\d*))?');
+
+      if (result_str == null) {
+          if ($('.user_phone_error').length > 0) {
+              return false;
+          } else {
+              field.parent().addClass('has-error')
+                  .append('<span class="user_phone_error">Phone should be 12 digits(excluding plus sign) and start with +380.</span>');
+          }
+      } else {
+          field.parent().removeClass('has-error');
+          $('.user_phone_error').remove();
+          return field.val();
+      }
+  }
 	
 	getNames(CBOOK);
 	getGroups(CGROUPS);
@@ -180,26 +225,34 @@ jQuery(function($){
 	});
 	// bring up the form for new contact
 	$(document).on('click', '#new-contact', function(){
+		closeOpenPopover();
 		$('#c-detail').addClass('hidden');
 		$form.removeClass('hidden');
+		$form.find('input').val('');
+		$form.find('#phone').val('+380');
 		$('.selected').removeClass('selected');
 	});
 	// add new contact to the list on left hand side
 	$(document).on('click', '#create-contact', function(){
-		$form.addClass('hidden');
-		new_name = $('#full-name').val();
-		new_email = $('#email').val();
-		new_phone = $('#phone').val();
+		closeOpenPopover();
+		
+		new_name = validateUsername($('#full-name'));
+		new_email = validateEmail($('#email'));
+		new_phone = validatePhone($('#phone'));
 		new_group = $('#group').val();
-		var new_contact = { 
-			full_name: new_name, 
-			email: new_email,
-			phone: new_phone,
-			group: new_group
-		};
-		CBOOK.push(new_contact);
-		getNames(CBOOK);
-		resetForm();
+
+		if(new_name && new_email && new_phone){
+			$form.addClass('hidden');
+			var new_contact = { 
+				full_name: new_name, 
+				email: new_email,
+				phone: new_phone,
+				group: new_group
+			};
+			CBOOK.push(new_contact);
+			getNames(CBOOK);
+			resetForm();
+		}
 	});
 	// delete contact from contacts
 	$(document).on('click', '.x-sign', function(e){
@@ -226,6 +279,7 @@ jQuery(function($){
 	// edit selected contact
 	$(document).on('click', '.edit', function(e){
 		e.stopPropagation();
+		closeOpenPopover();
 		var el = $(this).parent();
 		el.addClass('selected').siblings().removeClass('selected');
 		$form.find('#full-name').val(el.text());
@@ -238,21 +292,25 @@ jQuery(function($){
 	});
 	// save edited contact
 	$(document).on('click', '#save-contact', function(){
-		$form.addClass('hidden');
-		edited_name = $('#full-name').val();
-		edited_email = $('#email').val();
-		edited_phone = $('#phone').val();
+		closeOpenPopover();
+
+		edited_name = validateUsername($('#full-name'));
+		edited_email = validateEmail($('#email'));
+		edited_phone = validatePhone($('#phone'));
 		edited_group = $('#group').val();
-		var edited_contact = { 
-			full_name: edited_name, 
-			email: edited_email,
-			phone: edited_phone,
-			group: edited_group
-		};
-		index = getIndexByName($('.selected').text());
-		CBOOK[index] = edited_contact;
-		getNames(CBOOK);
-		resetForm();
+		if(edited_name && edited_email && edited_phone){
+			$form.addClass('hidden');
+			var edited_contact = { 
+				full_name: edited_name, 
+				email: edited_email,
+				phone: edited_phone,
+				group: edited_group
+			};
+			index = getIndexByName($('.selected').text());
+			CBOOK[index] = edited_contact;
+			getNames(CBOOK);
+			resetForm();
+		}
 	});
 
 // search by name
@@ -321,13 +379,8 @@ jQuery(function($){
 	$('#new-group').on('shown.bs.popover', function () {
 		$('#group-name').focus();
 		selected = $('.selected');
-		var s = '';
-		if(selected.length > 1){
-			s = 's';
-			$('.popover-title').html('New Group: <span class="badge">'+ selected.length +'</span> contact'+s+' selected');
-		}else if(selected.length == 1){
-			s = ''
-			$('.popover-title').html('New Group: <span class="badge">'+ selected.length +'</span> contact'+s+' selected');
+		if(selected.length > 0){
+			$('.popover-title').html('New Group: <span class="badge">'+ selected.length +'</span> contact'+(selected.length == 1 ? '' : 's')+' selected');
 		}else{
 			$('#new-group').popover('hide');
 			alert('No Contact Selected');
@@ -356,7 +409,6 @@ jQuery(function($){
 	$('.transfer').on('show.bs.popover', function(){
 		if($('.popover').length > 0){
 			$('.selected').find('.transfer').click();
-			console.log('closed popover');
 		}
 	});
 

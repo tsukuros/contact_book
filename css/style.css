@@ -78,10 +78,21 @@ h1 {
 	margin: 40px auto 0;
 	font-size: 18px;
 }
-#add-remove-box {
-	position: absolute;
-	bottom: 0;
-	left: 10px;
+#add-controls-box {
+	width: 100%;
+	margin: 30px 0 10px 0;
+}
+#new-contact {
+	color: rgb(10, 214, 10);
+	height: 14px;
+	width: 14px;
+	margin-top: 10px;
+	-webkit-transform: scale(1.5);
+	-webkit-transition: all .2s ease-in-out;
+}
+#new-contact:hover {
+	color: green;
+	-webkit-transform: scale(2);
 }
 .hidden {
 	display: none;
