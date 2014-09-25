@@ -114,22 +114,6 @@ jQuery(function($){
     return Text.toLowerCase().replace(/[^\w ]+/g,'').replace(/ +/g,'-');
   }
 
-  $.fn.selectRange = function(start, end) {
-	    if(!end) end = start; 
-	    return this.each(function() {
-	        if (this.setSelectionRange) {
-	            this.focus();
-	            this.setSelectionRange(start, end);
-	        } else if (this.createTextRange) {
-	            var range = this.createTextRange();
-	            range.collapse(true);
-	            range.moveEnd('character', end);
-	            range.moveStart('character', start);
-	            range.select();
-	        }
-	    });
-	};
-
 	function closeOpenPopover(){
 		if($('.popover').length > 0){
 			$('.selected').find('.transfer').click();
@@ -212,8 +196,14 @@ jQuery(function($){
 		if(e.ctrlKey || e.metaKey){
 			closeOpenPopover();
 			$(this).toggleClass('selected');
+			if ($('.selected').length > 1){
+				$('.hint').text('Hit button above!')
+			}else {
+				$('.hint').text('Ctrl(Cmd) + Click to select multiple contacts.')
+			}
 		}else{
 			closeOpenPopover();
+			$('.hint').text('Ctrl(Cmd) + Click to select multiple contacts.');
 			$form.addClass('hidden');
 			name = $(this).text();
 			email = $(this).data('email');
@@ -335,6 +325,7 @@ jQuery(function($){
 
 // filter by group
 	$(document).on('click', '.group-item', function(){
+		closeOpenPopover();
 		$('.ok').remove();
 		var group_name = $(this).text();
 		$('#groups').replaceWith('<button class="btn btn-default dropdown-toggle" type="button" id="groups" data-toggle="dropdown">'+group_name+'<span class="caret"></span></button>');
