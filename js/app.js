@@ -120,19 +120,33 @@ jQuery(function($){
 		}
 	}
 
+	function groupIsExists(group){
+		if(CGROUPS.indexOf(group) > -1){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
 	function createGroup(group_name, contact_list){
 		var c_names = [];
 		if(group_name){
-			CGROUPS.push(group_name);
-			getGroups(CGROUPS);
-			$('#new-group').popover('toggle');
-			contact_list.each(function(){
-				var index = getIndexByName($(this).text());
-				c_names.push($(this).text());
-				CBOOK[index].group = group_name;
-			});
-			getNames(CBOOK);
-			$('#c-detail').replaceWith('<div id="c-detail">Group <strong>'+ group_name +'</strong> has been successfully created with '+ contact_list.length +' contact'+(contact_list.length == 1 ? '' : 's')+'('+ c_names.join(', ') +').</div>').removeClass('hidden');
+			if(groupIsExists(group_name)){
+				alert('Group '+ group_name +' already exists!');
+			}else{
+				CGROUPS.push(group_name);
+				getGroups(CGROUPS);
+				$('#new-group').popover('toggle');
+				contact_list.each(function(){
+					var index = getIndexByName($(this).text());
+					c_names.push($(this).text());
+					CBOOK[index].group = group_name;
+				});
+				getNames(CBOOK);
+				$('#c-detail').replaceWith('<div id="c-detail">Group <strong>'+ group_name +'</strong> has been successfully created with '+ contact_list.length +' contact'+(contact_list.length == 1 ? '' : 's')+'('+ c_names.join(', ') +').</div>').removeClass('hidden');	
+			}
+		}else{
+			alert('group name can\'t be blank');
 		}
 	}
 
@@ -369,10 +383,14 @@ jQuery(function($){
 		selected = $('.selected');
 		if(e.which == 13){
 			createGroup($('#group-name').val(), selected);
+		}else if(e.which == 27){
+			$('#new-group').trigger('click');
+			$('#group-name').val('');
 		}
 	});
 
 	$('#new-group').on('shown.bs.popover', function () {
+		closeOpenPopover();
 		$('#group-name').focus();
 		selected = $('.selected');
 		if(selected.length > 0){
