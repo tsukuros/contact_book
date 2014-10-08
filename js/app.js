@@ -59,7 +59,7 @@ jQuery(function($){
 			index,
 			$container = $('#content'),
 			$form = $('form'),
-			contacts = $('.name_item');
+			current_group_contacts = $('.name_item');
 
 	function getNames(list){
 		var i = 0;
@@ -303,11 +303,11 @@ jQuery(function($){
 		}
 	});
 
-// search by name
+// filter by name
 	$('#search_by_name').keyup(function(){
 		var search_term = $(this).val();
 		search_term.length > 0 ? $('#remove_search_icon').fadeIn() : $('#remove_search_icon').fadeOut();
-    $('.name_item').each(function(){
+    current_group_contacts.each(function(){
       if ($(this).text().search(new RegExp(search_term, "i")) < 0) {
           $(this).fadeOut();
       } else {
@@ -331,7 +331,8 @@ jQuery(function($){
 		$('#groups').replaceWith('<button class="btn btn-default dropdown-toggle" type="button" id="groups" data-toggle="dropdown">'+group_name+'<span class="caret"></span></button>');
 		$(this).replaceWith('<li class="group-item">'+ group_name +'<span class="glyphicon glyphicon-ok-circle ok"></span></li>');
 		if(group_name === 'All Contacts'){
-			$('.name_item').show()
+			current_group_contacts = $('.name_item');
+			current_group_contacts.show();
 		}else{
 			$('.name_item').each(function(){
 	      if ($(this).data('group').search(new RegExp(group_name, "i")) < 0) {
@@ -340,6 +341,7 @@ jQuery(function($){
 	          $(this).show();
 	      }
 	    });
+	    current_group_contacts = $('[data-group="' + group_name + '"]');
 		}
 	});
 // end filter by group
