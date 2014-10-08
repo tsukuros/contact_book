@@ -343,6 +343,9 @@ jQuery(function($){
 	    });
 	    current_group_contacts = $('[data-group="' + group_name + '"]');
 		}
+		if($('#search_by_name').val() != ""){
+			$('#search_by_name').trigger('keyup');	
+		}
 	});
 // end filter by group
 
