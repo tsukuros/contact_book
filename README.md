@@ -6,3 +6,5 @@ Supports the following features:
 - Create new groups
 - Transfer one or multiple contacts to any group
 - Field validation
+- Search contacts by name
+- Search contacts by group 
